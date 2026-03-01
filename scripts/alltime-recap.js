@@ -466,12 +466,11 @@ function generateHTML() {
   // Day of week cells
   const dowCells = dowMap
     .map((cnt, i) => {
-      const intensity = cnt === 0 ? 0.06 : 0.12 + (cnt / maxDow) * 0.88;
-      const isDark = intensity > 0.5;
+      const intensity = cnt === 0 ? 0.03 : 0.06 + (cnt / maxDow) * 0.94;
       return `
-    <div class="dow-cell" style="background: rgba(243, 78, 63, ${intensity.toFixed(2)})">
-      <div class="dow-num" style="color: ${isDark ? "#f5f4ed" : "var(--text)"}">${cnt}</div>
-      <div class="dow-label" style="color: ${isDark ? "rgba(245,244,237,0.7)" : "var(--text-muted)"}">${dowNames[i]}</div>
+    <div class="dow-cell" style="background: rgba(243, 78, 63, ${intensity.toFixed(2)})${intensity > 0.4 ? '; box-shadow: 0 0 16px rgba(243,78,63,' + (intensity * 0.3).toFixed(2) + ')' : ''}">
+      <div class="dow-num">${cnt}</div>
+      <div class="dow-label">${dowNames[i]}</div>
     </div>`;
     })
     .join("\n");
@@ -480,12 +479,11 @@ function generateHTML() {
   const hourCells = [];
   for (let h = 0; h < 24; h++) {
     const cnt = hourMap[h] || 0;
-    const intensity = cnt === 0 ? 0.06 : 0.12 + (cnt / maxHour) * 0.88;
-    const isDark = intensity > 0.5;
+    const intensity = cnt === 0 ? 0.03 : 0.06 + (cnt / maxHour) * 0.94;
     hourCells.push(`
     <div class="hour-cell" style="background: rgba(243, 78, 63, ${intensity.toFixed(2)})" title="${formatHourLong(h)}: ${cnt} dictations">
-      <div class="hour-num" style="color: ${isDark ? "#f5f4ed" : "var(--text)"}">${cnt}</div>
-      <div class="hour-label" style="color: ${isDark ? "rgba(245,244,237,0.7)" : "var(--text-muted)"}">${h % 3 === 0 ? formatHour(h) : ""}</div>
+      <div class="hour-num">${cnt}</div>
+      <div class="hour-label">${h % 3 === 0 ? formatHour(h) : ""}</div>
     </div>`);
   }
 
@@ -548,19 +546,22 @@ function generateHTML() {
 <title>Wispr Flow All-Time Recap &mdash; ${escapeHTML(dateRange)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #f5f4ed;
-    --surface: rgba(255, 255, 255, 0.6);
-    --surface2: rgba(255, 255, 255, 0.85);
-    --border: rgba(135, 139, 134, 0.12);
-    --text: #0b0d0b;
-    --text-muted: #52534e;
+    --bg: #0c0c10;
+    --surface: rgba(255, 255, 255, 0.035);
+    --surface-hover: rgba(255, 255, 255, 0.06);
+    --border: rgba(255, 255, 255, 0.07);
+    --text: #e8e6e1;
+    --text-dim: #9a9890;
+    --text-muted: #5a5955;
     --accent: #f34e3f;
-    --accent-light: rgba(243, 78, 63, 0.12);
-    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --accent-soft: rgba(243, 78, 63, 0.12);
+    --accent-glow: rgba(243, 78, 63, 0.35);
+    --font-display: "Cormorant Garamond", "Times New Roman", serif;
     --font-serif: "Instrument Serif", "Times New Roman", serif;
+    --font-sans: "Sora", system-ui, -apple-system, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -569,116 +570,260 @@ function generateHTML() {
     background: var(--bg);
     color: var(--text);
     padding: 48px 24px;
-    max-width: 760px;
+    max-width: 800px;
     margin: 0 auto;
     line-height: 1.5;
-    font-size: 1.125rem;
+    font-size: 0.95rem;
+    position: relative;
   }
-  @media (min-width: 640px) { body { padding: 64px 32px; font-size: 1.25rem; } }
+  @media (min-width: 640px) { body { padding: 72px 40px; } }
 
-  .label-mono {
-    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
-    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
-    display: inline-flex; align-items: center; padding: 0.25rem 0.6rem;
-    background: var(--accent-light); border-radius: 999px; margin-bottom: 16px;
+  /* Warm radial glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 160%;
+    height: 70%;
+    background: radial-gradient(ellipse at center, rgba(243, 78, 63, 0.07) 0%, transparent 65%);
+    pointer-events: none;
+    z-index: -1;
   }
-  h1 { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 400;
-    line-height: 1.15; color: var(--text); margin-bottom: 6px; font-style: italic; }
-  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+  /* Noise grain overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    mix-blend-mode: overlay;
+  }
 
-  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 48px; }
-  @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
-  .stat-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px; backdrop-filter: blur(8px); }
-  .stat-value { font-family: var(--font-serif); font-size: 2rem; font-weight: 400;
-    color: var(--text); line-height: 1.1; margin-bottom: 4px; }
-  .stat-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.14em; }
-  .stat-note { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted);
-    letter-spacing: 0.04em; margin-top: 4px; opacity: 0.7; }
+  /* Hero */
+  .hero { text-align: center; padding: 32px 0 40px; margin-bottom: 24px; }
+  .hero-label {
+    font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+    background: var(--accent-soft); display: inline-flex; padding: 0.3rem 0.8rem;
+    border-radius: 999px; margin-bottom: 28px; border: 1px solid rgba(243,78,63,0.15);
+  }
+  .hero-number {
+    font-family: var(--font-display); font-size: 7rem; font-weight: 300;
+    line-height: 0.9; color: var(--text);
+    text-shadow: 0 0 80px var(--accent-glow), 0 0 180px rgba(243, 78, 63, 0.12);
+    margin-bottom: 8px;
+  }
+  @media (min-width: 640px) { .hero-number { font-size: 9.5rem; } }
+  .hero-unit {
+    font-family: var(--font-serif); font-size: 1.3rem; font-style: italic;
+    color: var(--text-dim); margin-bottom: 8px;
+  }
+  .hero-breakdown {
+    font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .hero-period {
+    font-family: var(--font-serif); font-size: 1.05rem; font-style: italic;
+    color: var(--text-muted); margin-bottom: 32px;
+  }
+  .hero-divider {
+    width: 48px; height: 1px; margin: 0 auto 28px;
+    background: linear-gradient(to right, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+  .hero-stats { display: flex; justify-content: center; gap: 40px; }
+  @media (max-width: 480px) { .hero-stats { gap: 24px; } }
+  .hero-stat { text-align: center; }
+  .hero-stat-value {
+    font-family: var(--font-display); font-size: 2rem; font-weight: 400;
+    color: var(--text); line-height: 1.1;
+  }
+  .hero-stat-label {
+    font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.14em; margin-top: 4px;
+  }
 
-  h2 { font-family: var(--font-serif); font-size: 1.75rem; font-weight: 400;
-    margin-bottom: 20px; color: var(--text); padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .section { margin-bottom: 48px; }
+  /* Stats Grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 56px; }
+  @media (max-width: 480px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; backdrop-filter: blur(12px);
+    transition: border-color 0.3s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.12); }
+  .stat-value {
+    font-family: var(--font-display); font-size: 1.7rem; font-weight: 400;
+    color: var(--text); line-height: 1.1; margin-bottom: 4px;
+  }
+  .stat-label {
+    font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .stat-note {
+    font-family: var(--font-mono); font-size: 0.45rem; color: var(--text-muted);
+    letter-spacing: 0.04em; margin-top: 4px; opacity: 0.5;
+  }
 
+  /* Sections */
+  h2 {
+    font-family: var(--font-serif); font-size: 1.5rem; font-weight: 400;
+    font-style: italic; margin-bottom: 20px; color: var(--text);
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .section { margin-bottom: 56px; }
+  .section-note {
+    font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-muted);
+    letter-spacing: 0.04em; margin-bottom: 12px;
+  }
+
+  /* Month Chart */
   .month-chart { display: flex; gap: 8px; align-items: flex-end; height: 200px; padding: 16px 0; }
   .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
-  .month-value { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); min-height: 16px; }
+  .month-value { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); min-height: 16px; }
   .month-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-  .month-bar { width: 100%; max-width: 64px; background: rgba(243, 78, 63, 0.25);
-    border-radius: 6px 6px 2px 2px; min-height: 2px; transition: height 0.6s ease; }
-  .month-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
-    letter-spacing: 0.04em; color: var(--text); text-align: center; line-height: 1.3; }
-  .month-sublabel { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted); }
+  .month-bar {
+    width: 100%; max-width: 64px;
+    background: linear-gradient(to top, var(--accent), #ff7b5f);
+    border-radius: 4px 4px 1px 1px; min-height: 2px;
+    box-shadow: 0 0 12px rgba(243, 78, 63, 0.15);
+    transition: height 0.6s ease, box-shadow 0.3s;
+  }
+  .month-col:hover .month-bar { box-shadow: 0 0 24px rgba(243, 78, 63, 0.35); }
+  .month-label { font-family: var(--font-mono); font-size: 0.55rem; font-weight: 500;
+    letter-spacing: 0.04em; color: var(--text-dim); text-align: center; line-height: 1.3; }
+  .month-sublabel { font-family: var(--font-mono); font-size: 0.45rem; color: var(--text-muted); }
 
+  /* Day of Week */
   .dow-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
-  .dow-cell { border-radius: 10px; display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 14px 8px; min-height: 64px; }
-  .dow-num { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 400;
-    font-style: italic; margin-bottom: 2px; }
-  .dow-label { font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .dow-cell {
+    border-radius: 10px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 14px 8px; min-height: 64px;
+    transition: transform 0.2s;
+  }
+  .dow-cell:hover { transform: scale(1.06); }
+  .dow-num { font-family: var(--font-display); font-size: 1.2rem; font-weight: 400;
+    color: var(--text); margin-bottom: 2px; }
+  .dow-label { font-family: var(--font-mono); font-size: 0.5rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-dim); }
 
+  /* Hour Grid */
   .hour-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 8px; }
   @media (min-width: 640px) { .hour-grid { grid-template-columns: repeat(12, 1fr); } }
-  .hour-cell { aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; min-height: 32px; }
-  .hour-num { font-family: var(--font-serif); font-size: 0.85rem; font-weight: 400; font-style: italic; }
-  .hour-label { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.06em; }
+  .hour-cell {
+    aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; min-height: 32px;
+    transition: transform 0.2s;
+  }
+  .hour-cell:hover { transform: scale(1.1); }
+  .hour-num { font-family: var(--font-display); font-size: 0.9rem; font-weight: 400; color: var(--text); }
+  .hour-label { font-family: var(--font-mono); font-size: 0.4rem; letter-spacing: 0.06em; color: var(--text-dim); }
 
-  .app-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 18px; margin-bottom: 8px; backdrop-filter: blur(8px); }
+  /* App Cards */
+  .app-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 8px;
+    backdrop-filter: blur(12px); transition: border-color 0.3s, transform 0.2s;
+  }
+  .app-card:hover { border-color: rgba(255,255,255,0.1); transform: translateX(4px); }
   .app-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .app-icon-fallback { display: flex; align-items: center; justify-content: center;
-    background: var(--accent-light); color: var(--accent); font-family: var(--font-serif);
-    font-size: 1.2rem; width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+  .app-icon-fallback {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--accent-soft); color: var(--accent);
+    font-family: var(--font-display); font-size: 1.2rem;
+    width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  }
   .app-header-text { flex: 1; min-width: 0; }
-  .app-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; color: var(--text); }
-  .app-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
-  .app-bar { height: 100%; background: var(--accent); border-radius: 2px; min-width: 4px; }
-  .app-stats { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.04em; }
+  .app-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 2px; color: var(--text); }
+  .app-bar-wrap { height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+  .app-bar {
+    height: 100%; border-radius: 2px; min-width: 4px;
+    background: linear-gradient(to right, var(--accent), #ff7b5f);
+  }
+  .app-stats { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.04em; }
 
+  /* Daily Bars */
   .daily-bars { display: flex; align-items: flex-end; gap: 1px; height: 80px; padding: 8px 0; }
-  .daily-bar { flex: 1; background: rgba(243, 78, 63, 0.25); border-radius: 2px 2px 0 0;
-    min-width: 0; min-height: 1px; cursor: pointer; position: relative; }
-  .daily-bar:hover { background: rgba(243, 78, 63, 0.5); }
+  .daily-bar {
+    flex: 1; border-radius: 2px 2px 0 0; min-width: 0; min-height: 1px;
+    cursor: pointer; position: relative;
+    background: linear-gradient(to top, rgba(243, 78, 63, 0.35), rgba(255, 123, 95, 0.2));
+    transition: background 0.2s;
+  }
+  .daily-bar:hover { background: linear-gradient(to top, rgba(243, 78, 63, 0.7), rgba(255, 123, 95, 0.45)); }
   .daily-bar:hover .daily-tip { display: block; }
-  .daily-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
+  .daily-tip {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
     transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 4px 8px;
     border-radius: 6px; font-family: var(--font-mono); font-size: 0.55rem;
-    white-space: nowrap; z-index: 10; pointer-events: none; }
-  .daily-legend { display: flex; justify-content: space-between; font-family: var(--font-mono);
-    font-size: 0.55rem; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 4px; }
+    white-space: nowrap; z-index: 10; pointer-events: none;
+  }
+  .daily-legend {
+    display: flex; justify-content: space-between; font-family: var(--font-mono);
+    font-size: 0.55rem; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 4px;
+  }
 
-  .streaks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .streak-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(8px); }
-  .streak-value { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 400;
-    color: var(--accent); line-height: 1.1; margin-bottom: 4px; }
-  .streak-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
-    text-transform: uppercase; letter-spacing: 0.14em; }
+  /* Streaks */
+  .streaks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .streak-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; text-align: center; backdrop-filter: blur(12px);
+  }
+  .streak-value {
+    font-family: var(--font-display); font-size: 1.8rem; font-weight: 400;
+    color: var(--accent); line-height: 1.1; margin-bottom: 4px;
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+  .streak-label {
+    font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
 
-  .persona-card { background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px; margin-bottom: 12px; backdrop-filter: blur(8px); }
+  /* Persona Cards */
+  .persona-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 2px solid var(--accent); border-radius: 2px 12px 12px 2px;
+    padding: 24px; margin-bottom: 12px; backdrop-filter: blur(12px);
+    transition: border-left-color 0.3s, transform 0.2s;
+  }
+  .persona-card:hover { border-left-color: #ff7b5f; transform: translateX(4px); }
   .persona-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .persona-emoji { font-size: 1.6rem; width: 44px; height: 44px; display: flex;
-    align-items: center; justify-content: center; background: var(--accent-light);
-    border-radius: 12px; flex-shrink: 0; }
-  .persona-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 400;
-    font-style: italic; color: var(--text); }
-  .persona-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+  .persona-emoji {
+    font-size: 1.4rem; width: 42px; height: 42px; display: flex;
+    align-items: center; justify-content: center;
+    background: var(--accent-soft); border-radius: 10px; flex-shrink: 0;
+  }
+  .persona-title {
+    font-family: var(--font-serif); font-size: 1.15rem; font-weight: 400;
+    font-style: italic; color: var(--text);
+  }
+  .persona-desc { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
   .persona-desc strong { color: var(--text); }
-  .persona-stat { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
-    letter-spacing: 0.04em; border-top: 1px solid var(--border); padding-top: 10px; }
+  .persona-desc em { color: var(--accent); font-style: italic; }
+  .persona-stat {
+    font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-muted);
+    letter-spacing: 0.04em; border-top: 1px solid var(--border); padding-top: 10px;
+  }
 
-  .share-btn { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
-    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);
-    background: var(--accent-light); border: none; border-radius: 999px;
-    padding: 8px 16px; cursor: pointer; transition: background 0.2s; margin-bottom: 16px; }
-  .share-btn:hover { background: rgba(243, 78, 63, 0.2); }
+  /* Share Button */
+  .share-btn {
+    font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid rgba(243, 78, 63, 0.18);
+    border-radius: 999px; padding: 10px 20px; cursor: pointer;
+    transition: all 0.3s; margin-bottom: 16px;
+  }
+  .share-btn:hover { background: rgba(243, 78, 63, 0.2); box-shadow: 0 0 20px rgba(243, 78, 63, 0.2); }
 
-  .share-card { position: absolute; left: -9999px; top: 0; width: 1200px; height: 630px;
-    background: var(--bg); padding: 56px 64px; display: flex; flex-direction: column;
-    justify-content: space-between; font-family: var(--font-sans); }
+  /* Share Card */
+  .share-card {
+    position: absolute; left: -9999px; top: 0; width: 1200px; height: 630px;
+    background: #0c0c10; padding: 56px 64px; display: flex; flex-direction: column;
+    justify-content: space-between; font-family: var(--font-sans); color: var(--text);
+  }
   .sc-top { display: flex; justify-content: space-between; align-items: center; }
   .sc-brand { font-family: var(--font-mono); font-size: 14px; font-weight: 500;
     letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
@@ -687,9 +832,11 @@ function generateHTML() {
   .sc-title { font-family: var(--font-serif); font-size: 52px; font-weight: 400;
     font-style: italic; color: var(--text); line-height: 1.15; margin-top: 8px; }
   .sc-stats { display: flex; gap: 24px; margin-top: 4px; }
-  .sc-stat { background: rgba(255,255,255,0.6); border: 1px solid rgba(135,139,134,0.12);
-    border-radius: 16px; padding: 20px 28px; flex: 1; text-align: center; }
-  .sc-num { font-family: var(--font-serif); font-size: 44px; font-weight: 400;
+  .sc-stat {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 20px 28px; flex: 1; text-align: center;
+  }
+  .sc-num { font-family: var(--font-display); font-size: 44px; font-weight: 400;
     color: var(--text); line-height: 1.1; }
   .sc-label { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
     color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 4px; }
@@ -697,117 +844,148 @@ function generateHTML() {
   .sc-app { display: flex; align-items: center; gap: 14px; }
   .sc-app-name { font-family: var(--font-sans); font-size: 16px; font-weight: 600;
     color: var(--text); min-width: 120px; text-align: right; }
-  .sc-app-bar-wrap { flex: 1; height: 12px; background: rgba(135,139,134,0.08);
+  .sc-app-bar-wrap { flex: 1; height: 12px; background: rgba(255,255,255,0.06);
     border-radius: 6px; overflow: hidden; }
-  .sc-app-bar { height: 100%; background: #2d2d2d; border-radius: 6px; }
+  .sc-app-bar { height: 100%; background: linear-gradient(to right, var(--accent), #ff7b5f); border-radius: 6px; }
   .sc-app-pct { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); min-width: 40px; }
 
-  .share-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-    backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+  /* Share Modal */
+  .share-modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;
+  }
   .share-modal.open { display: flex; }
-  .share-modal-inner { background: #fff; border-radius: 20px; padding: 24px;
-    max-width: 680px; width: 90%; box-shadow: 0 24px 48px rgba(0,0,0,0.2); position: relative; }
-  .share-modal-inner img { width: 100%; border-radius: 12px; border: 1px solid rgba(135,139,134,0.12); }
-  .modal-close { position: absolute; top: -12px; right: -12px; width: 32px; height: 32px;
-    border-radius: 50%; background: var(--text); color: #fff; border: none; font-size: 18px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .share-modal-inner {
+    background: #1a1a1e; border: 1px solid var(--border); border-radius: 20px;
+    padding: 24px; max-width: 680px; width: 90%;
+    box-shadow: 0 24px 48px rgba(0,0,0,0.5); position: relative;
+  }
+  .share-modal-inner img { width: 100%; border-radius: 12px; border: 1px solid var(--border); }
+  .modal-close {
+    position: absolute; top: -12px; right: -12px; width: 32px; height: 32px;
+    border-radius: 50%; background: var(--text); color: var(--bg); border: none;
+    font-size: 18px; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
   .share-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: center; }
-  .share-action-btn { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+  .share-action-btn {
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
     letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 20px;
-    border-radius: 999px; cursor: pointer; border: none; transition: background 0.2s;
-    display: flex; align-items: center; gap: 8px; }
+    border-radius: 999px; cursor: pointer; border: none; transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
   .share-action-btn.primary { background: var(--accent); color: #fff; }
-  .share-action-btn.primary:hover { background: #e04435; }
-  .share-action-btn.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
-  .share-action-btn.secondary:hover { background: #edece5; }
+  .share-action-btn.primary:hover { background: #e04435; box-shadow: 0 0 16px rgba(243,78,63,0.4); }
+  .share-action-btn.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+  .share-action-btn.secondary:hover { background: var(--surface-hover); }
   .share-action-btn svg { width: 14px; height: 14px; }
 
-  .footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
-    font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
-    text-align: center; letter-spacing: 0.1em; text-transform: uppercase; }
+  /* Footer */
+  .footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 0.55rem; color: var(--text-muted);
+    text-align: center; letter-spacing: 0.1em; text-transform: uppercase;
+  }
   .footer a { color: var(--accent); text-decoration: underline;
     text-underline-offset: 3px; text-decoration-thickness: 1px; }
-  .footer-brand { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
-    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .footer-brand {
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+    margin-bottom: 8px; text-shadow: 0 0 20px var(--accent-glow);
+  }
   .footer-links { margin-top: 6px; line-height: 1.8; }
+
+  /* Stagger Animations */
+  .anim {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .anim.visible { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
 
-<div class="label-mono">All-Time Recap</div>
-<h1>${escapeHTML(dateRange)}</h1>
-<div class="subtitle">Your voice in data &mdash; powered by Wispr Flow</div>
+<div class="hero anim">
+  <div class="hero-label">All-Time Recap</div>
+  <div class="hero-number">${totalWords.toLocaleString()}</div>
+  <div class="hero-unit">words dictated</div>
+  ${hasApi && desktopWords !== null ? `<div class="hero-breakdown">${desktopWords.toLocaleString()} desktop &middot; ${mobileWords.toLocaleString()} mobile</div>` : ""}
+  <div class="hero-period">${escapeHTML(dateRange)}</div>
+  <div class="hero-divider"></div>
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-value">${voiceTime}</div>
+      <div class="hero-stat-label">Voice Time</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">${wpmDisplay}</div>
+      <div class="hero-stat-label">Avg WPM</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-value">${totalDictations.toLocaleString()}</div>
+      <div class="hero-stat-label">Dictations</div>
+    </div>
+  </div>
+</div>
 
-<div class="stats-grid">
-  <div class="stat-card">
-    <div class="stat-value">${totalWords.toLocaleString()}</div>
-    <div class="stat-label">Total Words</div>
-    ${hasApi && desktopWords !== null ? `<div class="stat-note">${desktopWords.toLocaleString()} desktop + ${mobileWords.toLocaleString()} mobile</div>` : ""}
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">${voiceTime}</div>
-    <div class="stat-label">Voice Time</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">${wpmDisplay}</div>
-    <div class="stat-label">Avg WPM</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-value">${totalDictations.toLocaleString()}</div>
-    <div class="stat-label">Dictations</div>
-    <div class="stat-note">Local cache</div>
-  </div>
+<div class="stats-grid anim">
   <div class="stat-card">
     <div class="stat-value">${activeDayCount}</div>
     <div class="stat-label">Active Days</div>
   </div>
   <div class="stat-card">
     <div class="stat-value">${monthsTracked}</div>
-    <div class="stat-label">Months Tracked</div>
+    <div class="stat-label">Months</div>
   </div>
   ${dayStreak !== null ? `<div class="stat-card">
     <div class="stat-value">${dayStreak}</div>
     <div class="stat-label">Day Streak</div>
-  </div>` : ""}
+  </div>` : `<div class="stat-card">
+    <div class="stat-value">${avgWords.toFixed(0)}</div>
+    <div class="stat-label">Avg Words</div>
+  </div>`}
   ${weekStreak !== null ? `<div class="stat-card">
     <div class="stat-value">${weekStreak}</div>
     <div class="stat-label">Week Streak</div>
   </div>` : ""}
   ${wordsThisWeek !== null ? `<div class="stat-card">
     <div class="stat-value">${wordsThisWeek.toLocaleString()}</div>
-    <div class="stat-label">Words This Week</div>
+    <div class="stat-label">This Week</div>
+  </div>` : ""}
+  ${totalAppsCount !== null ? `<div class="stat-card">
+    <div class="stat-value">${totalAppsCount}</div>
+    <div class="stat-label">Apps Used</div>
   </div>` : ""}
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Month by Month</h2>
   <div class="month-chart">
     ${monthBars}
   </div>
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Day of Week</h2>
   <div class="dow-grid">
     ${dowCells}
   </div>
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Hour by Hour</h2>
   <div class="hour-grid">
     ${hourCells.join("\n")}
   </div>
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Apps</h2>
-  ${totalAppsCount !== null ? `<div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.04em; margin-bottom: 12px;">${totalAppsCount} apps used all-time (${appsSorted.length} shown from local cache)</div>` : ""}
+  ${totalAppsCount !== null ? `<div class="section-note">${totalAppsCount} apps used all-time &middot; ${appsSorted.length} shown from local cache</div>` : ""}
   ${appCards}
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Daily Activity</h2>
   <div class="daily-bars" id="dailyBars"></div>
   <div class="daily-legend">
@@ -816,7 +994,7 @@ function generateHTML() {
   </div>
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Consistency</h2>
   <div class="streaks-grid">
     <div class="streak-card">
@@ -834,7 +1012,7 @@ function generateHTML() {
   </div>
 </div>
 
-<div class="section">
+<div class="section anim">
   <h2>Voice Personality Profile</h2>
 
   <div class="persona-card">
@@ -874,7 +1052,7 @@ function generateHTML() {
   </div>
 </div>
 
-<div class="footer">
+<div class="footer anim">
   <button class="share-btn" onclick="generateShareImage()">Share</button>
   <div class="footer-brand">Red Beard Conversions</div>
   <div class="footer-links">
@@ -921,6 +1099,7 @@ function generateHTML() {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+// Daily activity bars
 const dailyData = ${dailyJSON};
 const maxDaily = Math.max(...dailyData.map(d => d[1]));
 const barsContainer = document.getElementById('dailyBars');
@@ -937,6 +1116,21 @@ dailyData.forEach(([date, cnt]) => {
   barsContainer.appendChild(bar);
 });
 
+// Staggered reveal animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+document.querySelectorAll('.anim').forEach((el, i) => {
+  el.style.transitionDelay = (i * 0.07) + 's';
+  observer.observe(el);
+});
+
+// Share functionality
 const shareText = "${totalWords.toLocaleString()} words dictated across ${monthsTracked} months with @WisprFlow — ${aiPct}% going straight to AI tools";
 let shareBlob = null;
 async function generateShareImage() {
@@ -944,7 +1138,7 @@ async function generateShareImage() {
   const card = document.getElementById("shareCard");
   card.style.left = "0"; card.style.top = "0"; card.style.position = "fixed"; card.style.zIndex = "-1";
   try {
-    const canvas = await html2canvas(card, { scale: 2, backgroundColor: "#f5f4ed", width: 1200, height: 630, useCORS: true });
+    const canvas = await html2canvas(card, { scale: 2, backgroundColor: "#0c0c10", width: 1200, height: 630, useCORS: true });
     card.style.left = "-9999px"; card.style.position = "absolute"; card.style.zIndex = "";
     document.getElementById("shareImg").src = canvas.toDataURL("image/png");
     canvas.toBlob(b => { shareBlob = b; });
