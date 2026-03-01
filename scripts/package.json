@@ -1,0 +1,9 @@
+{
+  "name": "wispr-flow-dashboard",
+  "version": "1.0.0",
+  "description": "All-time voice activity dashboard for Wispr Flow",
+  "private": true,
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  }
+}
