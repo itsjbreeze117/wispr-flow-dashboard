@@ -10,11 +10,52 @@ const DB_PATH = path.join(
   os.homedir(),
   "Library/Application Support/Wispr Flow/flow.sqlite"
 );
+const SESSION_PATH = path.join(
+  os.homedir(),
+  "Library/Application Support/Wispr Flow/session.json"
+);
+const API_BASE = "https://api.wisprflow.ai";
 
 const args = process.argv.slice(2);
 const flagHTML = args.includes("--html");
 const outFlag = args.find((a) => a.startsWith("--out="));
 const outDir = outFlag ? outFlag.split("=")[1] : os.homedir() + "/Desktop";
+
+// --- Fetch API stats (returns null on failure) ---
+async function fetchApiStats() {
+  try {
+    if (!fs.existsSync(SESSION_PATH)) {
+      console.warn("[api] Session file not found — using local data only");
+      return null;
+    }
+    const sessionData = JSON.parse(fs.readFileSync(SESSION_PATH, "utf-8"));
+    const sbKey = Object.keys(sessionData).find((k) => k.startsWith("sb-"));
+    if (!sbKey) {
+      console.warn("[api] No sb- auth key found — using local data only");
+      return null;
+    }
+    const session = JSON.parse(sessionData[sbKey]);
+    const token = session.access_token;
+    if (!token) {
+      console.warn("[api] No access_token in session — using local data only");
+      return null;
+    }
+
+    const res = await fetch(`${API_BASE}/history/stats`, {
+      headers: { Authorization: token },
+    });
+    if (!res.ok) {
+      console.warn(`[api] Stats request failed (${res.status}) — using local data only`);
+      return null;
+    }
+    const stats = await res.json();
+    console.log("[api] Server stats loaded successfully");
+    return stats;
+  } catch (err) {
+    console.warn(`[api] ${err.message} — using local data only`);
+    return null;
+  }
+}
 
 // --- Open DB (read-only) ---
 if (!fs.existsSync(DB_PATH)) {
@@ -22,6 +63,12 @@ if (!fs.existsSync(DB_PATH)) {
   process.exit(1);
 }
 const db = new Database(DB_PATH, { readonly: true });
+
+// --- Main (async for API fetch) ---
+(async () => {
+
+// Fetch API stats in parallel with DB query
+const apiStatsPromise = fetchApiStats();
 
 // --- Query all rows ---
 const rows = db
@@ -48,19 +95,40 @@ if (rows.length === 0) {
   process.exit(0);
 }
 
+// Wait for API stats
+const apiStats = await apiStatsPromise;
+const hasApi = apiStats !== null;
+
 // --- Derive date range ---
 const firstDate = rows[0].timestamp.slice(0, 10);
 const lastDate = rows[rows.length - 1].timestamp.slice(0, 10);
 
-// --- Aggregate stats ---
-const totalDictations = rows.length;
-const totalWords = rows.reduce((sum, r) => sum + (r.numWords || 0), 0);
-const totalDuration = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
-const totalSpeechDuration = rows.reduce(
+// --- SQLite aggregate stats ---
+const sqliteDictations = rows.length;
+const sqliteWords = rows.reduce((sum, r) => sum + (r.numWords || 0), 0);
+const sqliteDuration = rows.reduce((sum, r) => sum + (r.duration || 0), 0);
+const sqliteSpeechDuration = rows.reduce(
   (sum, r) => sum + (r.speechDuration || 0),
   0
 );
-const avgWords = totalWords / totalDictations;
+
+// --- Hybrid stats: prefer API, fall back to SQLite ---
+const totalDictations = sqliteDictations; // API doesn't provide dictation count
+const totalWords = hasApi ? apiStats.total_words : sqliteWords;
+const totalDuration = hasApi ? apiStats.total_duration : sqliteDuration;
+const totalSpeechDuration = hasApi
+  ? apiStats.total_non_empty_duration
+  : sqliteSpeechDuration;
+const avgWPM = hasApi ? apiStats.words_per_minute : null;
+const avgWords = sqliteWords / sqliteDictations; // always from SQLite (per-dictation avg)
+
+// API-only stats (null when offline)
+const dayStreak = hasApi ? apiStats.day_streak : null;
+const weekStreak = hasApi ? apiStats.week_streak : null;
+const wordsThisWeek = hasApi ? apiStats.words_this_week : null;
+const desktopWords = hasApi ? apiStats.desktop_total_words : null;
+const mobileWords = hasApi ? apiStats.mobile_total_words : null;
+const totalAppsCount = hasApi ? apiStats.total_apps.length : null;
 
 // Active days
 const activeDays = new Set(rows.map((r) => r.timestamp.slice(0, 10)));
@@ -321,17 +389,27 @@ function formatDateRange() {
 // ===================== CLI =====================
 
 function printCLI() {
-  console.log(`\n# Wispr Flow All-Time Recap — ${formatDateRange()}\n`);
+  const src = hasApi ? "(API + local)" : "(local only)";
+  console.log(`\n# Wispr Flow All-Time Recap — ${formatDateRange()} ${src}\n`);
   console.log(`| Metric | Value |`);
   console.log(`|--------|-------|`);
-  console.log(`| Dictations | ${totalDictations} |`);
+  console.log(`| Dictations (local) | ${totalDictations} |`);
   console.log(`| Total words | ${totalWords.toLocaleString()} |`);
+  if (hasApi && desktopWords !== null) {
+    console.log(`| └ Desktop | ${desktopWords.toLocaleString()} |`);
+    console.log(`| └ Mobile | ${mobileWords.toLocaleString()} |`);
+  }
   console.log(
     `| Voice time | ${formatDuration(totalSpeechDuration || totalDuration)} |`
   );
+  if (avgWPM) console.log(`| Avg WPM | ${avgWPM.toFixed(1)} |`);
   console.log(`| Avg words/dictation | ${avgWords.toFixed(1)} |`);
   console.log(`| Active days | ${activeDayCount} |`);
   console.log(`| Months tracked | ${monthsTracked} |`);
+  if (dayStreak !== null) console.log(`| Day streak | ${dayStreak} |`);
+  if (weekStreak !== null) console.log(`| Week streak | ${weekStreak} |`);
+  if (wordsThisWeek !== null) console.log(`| Words this week | ${wordsThisWeek.toLocaleString()} |`);
+  if (totalAppsCount !== null) console.log(`| Total apps (all-time) | ${totalAppsCount} |`);
   console.log();
 
   console.log("## Month by Month\n");
@@ -345,7 +423,7 @@ function printCLI() {
   }
   console.log();
 
-  console.log("## Apps\n");
+  console.log("## Apps (local data)\n");
   for (const [name, stats] of appsSorted) {
     const pct = Math.round((stats.count / totalDictations) * 100);
     console.log(
@@ -360,11 +438,13 @@ function printCLI() {
 function generateHTML() {
   const dateRange = formatDateRange();
   const voiceTime = formatDuration(totalSpeechDuration || totalDuration);
+  const wpmDisplay = avgWPM ? avgWPM.toFixed(0) : Math.round(sqliteWords / ((sqliteSpeechDuration || sqliteDuration) / 60));
   const today = new Date().toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+  const dataSource = hasApi ? "Server API + local cache" : "Local cache only";
 
   // Day of week names
   const dowNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -661,21 +741,22 @@ function generateHTML() {
 
 <div class="stats-grid">
   <div class="stat-card">
-    <div class="stat-value">${totalDictations.toLocaleString()}</div>
-    <div class="stat-label">Dictations</div>
-  </div>
-  <div class="stat-card">
     <div class="stat-value">${totalWords.toLocaleString()}</div>
-    <div class="stat-label">Words</div>
+    <div class="stat-label">Total Words</div>
+    ${hasApi && desktopWords !== null ? `<div class="stat-note">${desktopWords.toLocaleString()} desktop + ${mobileWords.toLocaleString()} mobile</div>` : ""}
   </div>
   <div class="stat-card">
     <div class="stat-value">${voiceTime}</div>
     <div class="stat-label">Voice Time</div>
-    ${totalSpeechDuration > 0 ? "" : '<div class="stat-note">Based on recording duration</div>'}
   </div>
   <div class="stat-card">
-    <div class="stat-value">${avgWords.toFixed(1)}</div>
-    <div class="stat-label">Avg Words / Dictation</div>
+    <div class="stat-value">${wpmDisplay}</div>
+    <div class="stat-label">Avg WPM</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">${totalDictations.toLocaleString()}</div>
+    <div class="stat-label">Dictations</div>
+    <div class="stat-note">Local cache</div>
   </div>
   <div class="stat-card">
     <div class="stat-value">${activeDayCount}</div>
@@ -685,6 +766,18 @@ function generateHTML() {
     <div class="stat-value">${monthsTracked}</div>
     <div class="stat-label">Months Tracked</div>
   </div>
+  ${dayStreak !== null ? `<div class="stat-card">
+    <div class="stat-value">${dayStreak}</div>
+    <div class="stat-label">Day Streak</div>
+  </div>` : ""}
+  ${weekStreak !== null ? `<div class="stat-card">
+    <div class="stat-value">${weekStreak}</div>
+    <div class="stat-label">Week Streak</div>
+  </div>` : ""}
+  ${wordsThisWeek !== null ? `<div class="stat-card">
+    <div class="stat-value">${wordsThisWeek.toLocaleString()}</div>
+    <div class="stat-label">Words This Week</div>
+  </div>` : ""}
 </div>
 
 <div class="section">
@@ -710,6 +803,7 @@ function generateHTML() {
 
 <div class="section">
   <h2>Apps</h2>
+  ${totalAppsCount !== null ? `<div style="font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted); letter-spacing: 0.04em; margin-bottom: 12px;">${totalAppsCount} apps used all-time (${appsSorted.length} shown from local cache)</div>` : ""}
   ${appCards}
 </div>
 
@@ -784,7 +878,7 @@ function generateHTML() {
   <button class="share-btn" onclick="generateShareImage()">Share</button>
   <div class="footer-brand">Red Beard Conversions</div>
   <div class="footer-links">
-    Generated ${today} &middot; Powered by <a href="https://lttlmg.ht/wisprflow">Wispr Flow</a> + Claude Code
+    Generated ${today} &middot; ${dataSource} &middot; Powered by <a href="https://lttlmg.ht/wisprflow">Wispr Flow</a> + Claude Code
   </div>
 </div>
 
@@ -798,9 +892,9 @@ function generateHTML() {
     <div class="sc-title">${escapeHTML(dateRange)}</div>
   </div>
   <div class="sc-stats">
-    <div class="sc-stat"><div class="sc-num">${totalDictations.toLocaleString()}</div><div class="sc-label">Dictations</div></div>
     <div class="sc-stat"><div class="sc-num">${totalWords.toLocaleString()}</div><div class="sc-label">Words</div></div>
     <div class="sc-stat"><div class="sc-num">${voiceTime}</div><div class="sc-label">Voice Time</div></div>
+    <div class="sc-stat"><div class="sc-num">${wpmDisplay} wpm</div><div class="sc-label">Avg Speed</div></div>
   </div>
   <div class="sc-apps">
     ${shareApps}
@@ -843,7 +937,7 @@ dailyData.forEach(([date, cnt]) => {
   barsContainer.appendChild(bar);
 });
 
-const shareText = "${totalDictations} dictations across ${monthsTracked} months with @WisprFlow — ${aiPct}% going straight to AI tools";
+const shareText = "${totalWords.toLocaleString()} words dictated across ${monthsTracked} months with @WisprFlow — ${aiPct}% going straight to AI tools";
 let shareBlob = null;
 async function generateShareImage() {
   const btn = document.querySelector(".share-btn"); btn.textContent = "...";
@@ -873,3 +967,5 @@ document.getElementById("shareModal").addEventListener("click", (e) => { if (e.t
 </body>
 </html>`;
 }
+
+})(); // end async IIFE
