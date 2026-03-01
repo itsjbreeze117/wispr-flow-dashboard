@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "All-time voice activity dashboard for Wispr Flow",
   "private": true,
+  "scripts": {
+    "atlas:generate": "python3 ../scripts/atlas/generate_atlas.py --write",
+    "atlas:check": "python3 ../scripts/atlas/generate_atlas.py --check"
+  },
   "dependencies": {
     "better-sqlite3": "^11.0.0"
   }
