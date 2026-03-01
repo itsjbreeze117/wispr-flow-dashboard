@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wispr Flow All-Time Recap &mdash; August 2025 – February 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4ed;
+    --surface: rgba(255, 255, 255, 0.6);
+    --surface2: rgba(255, 255, 255, 0.85);
+    --border: rgba(135, 139, 134, 0.12);
+    --text: #0b0d0b;
+    --text-muted: #52534e;
+    --accent: #f34e3f;
+    --accent-light: rgba(243, 78, 63, 0.12);
+    --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+    --font-serif: "Instrument Serif", "Times New Roman", serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    padding: 48px 24px;
+    max-width: 760px;
+    margin: 0 auto;
+    line-height: 1.5;
+    font-size: 1.125rem;
+  }
+  @media (min-width: 640px) { body { padding: 64px 32px; font-size: 1.25rem; } }
+
+  .label-mono {
+    font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent);
+    display: inline-flex; align-items: center; padding: 0.25rem 0.6rem;
+    background: var(--accent-light); border-radius: 999px; margin-bottom: 16px;
+  }
+  h1 { font-family: var(--font-serif); font-size: 2.5rem; font-weight: 400;
+    line-height: 1.15; color: var(--text); margin-bottom: 6px; font-style: italic; }
+  .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 40px; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 48px; }
+  @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+  .stat-card { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; backdrop-filter: blur(8px); }
+  .stat-value { font-family: var(--font-serif); font-size: 2rem; font-weight: 400;
+    color: var(--text); line-height: 1.1; margin-bottom: 4px; }
+  .stat-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.14em; }
+  .stat-note { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted);
+    letter-spacing: 0.04em; margin-top: 4px; opacity: 0.7; }
+
+  h2 { font-family: var(--font-serif); font-size: 1.75rem; font-weight: 400;
+    margin-bottom: 20px; color: var(--text); padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .section { margin-bottom: 48px; }
+
+  .month-chart { display: flex; gap: 8px; align-items: flex-end; height: 200px; padding: 16px 0; }
+  .month-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; }
+  .month-value { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); min-height: 16px; }
+  .month-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
+  .month-bar { width: 100%; max-width: 64px; background: rgba(243, 78, 63, 0.25);
+    border-radius: 6px 6px 2px 2px; min-height: 2px; transition: height 0.6s ease; }
+  .month-label { font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+    letter-spacing: 0.04em; color: var(--text); text-align: center; line-height: 1.3; }
+  .month-sublabel { font-family: var(--font-mono); font-size: 0.5rem; color: var(--text-muted); }
+
+  .dow-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
+  .dow-cell { border-radius: 10px; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 14px 8px; min-height: 64px; }
+  .dow-num { font-family: var(--font-serif); font-size: 1.1rem; font-weight: 400;
+    font-style: italic; margin-bottom: 2px; }
+  .dow-label { font-family: var(--font-mono); font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .hour-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 8px; }
+  @media (min-width: 640px) { .hour-grid { grid-template-columns: repeat(12, 1fr); } }
+  .hour-cell { aspect-ratio: 1; border-radius: 6px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; min-height: 32px; }
+  .hour-num { font-family: var(--font-serif); font-size: 0.85rem; font-weight: 400; font-style: italic; }
+  .hour-label { font-family: var(--font-mono); font-size: 0.45rem; letter-spacing: 0.06em; }
+
+  .app-card { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 8px; backdrop-filter: blur(8px); }
+  .app-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .app-icon-fallback { display: flex; align-items: center; justify-content: center;
+    background: var(--accent-light); color: var(--accent); font-family: var(--font-serif);
+    font-size: 1.2rem; width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+  .app-header-text { flex: 1; min-width: 0; }
+  .app-name { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; color: var(--text); }
+  .app-bar-wrap { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .app-bar { height: 100%; background: var(--accent); border-radius: 2px; min-width: 4px; }
+  .app-stats { font-family: var(--font-mono); font-size: 0.65rem; color: var(--text-muted); letter-spacing: 0.04em; }
+
+  .daily-bars { display: flex; align-items: flex-end; gap: 1px; height: 80px; padding: 8px 0; }
+  .daily-bar { flex: 1; background: rgba(243, 78, 63, 0.25); border-radius: 2px 2px 0 0;
+    min-width: 0; min-height: 1px; cursor: pointer; position: relative; }
+  .daily-bar:hover { background: rgba(243, 78, 63, 0.5); }
+  .daily-bar:hover .daily-tip { display: block; }
+  .daily-tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%;
+    transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 4px 8px;
+    border-radius: 6px; font-family: var(--font-mono); font-size: 0.55rem;
+    white-space: nowrap; z-index: 10; pointer-events: none; }
+  .daily-legend { display: flex; justify-content: space-between; font-family: var(--font-mono);
+    font-size: 0.55rem; color: var(--text-muted); letter-spacing: 0.04em; margin-top: 4px; }
+
+  .streaks-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .streak-card { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; text-align: center; backdrop-filter: blur(8px); }
+  .streak-value { font-family: var(--font-serif); font-size: 1.8rem; font-weight: 400;
+    color: var(--accent); line-height: 1.1; margin-bottom: 4px; }
+  .streak-label { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.14em; }
+
+  .persona-card { background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; margin-bottom: 12px; backdrop-filter: blur(8px); }
+  .persona-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .persona-emoji { font-size: 1.6rem; width: 44px; height: 44px; display: flex;
+    align-items: center; justify-content: center; background: var(--accent-light);
+    border-radius: 12px; flex-shrink: 0; }
+  .persona-title { font-family: var(--font-serif); font-size: 1.25rem; font-weight: 400;
+    font-style: italic; color: var(--text); }
+  .persona-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+  .persona-desc strong { color: var(--text); }
+  .persona-stat { font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    letter-spacing: 0.04em; border-top: 1px solid var(--border); padding-top: 10px; }
+
+  .share-btn { font-family: var(--font-mono); font-size: 0.65rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent);
+    background: var(--accent-light); border: none; border-radius: 999px;
+    padding: 8px 16px; cursor: pointer; transition: background 0.2s; margin-bottom: 16px; }
+  .share-btn:hover { background: rgba(243, 78, 63, 0.2); }
+
+  .share-card { position: absolute; left: -9999px; top: 0; width: 1200px; height: 630px;
+    background: var(--bg); padding: 56px 64px; display: flex; flex-direction: column;
+    justify-content: space-between; font-family: var(--font-sans); }
+  .sc-top { display: flex; justify-content: space-between; align-items: center; }
+  .sc-brand { font-family: var(--font-mono); font-size: 14px; font-weight: 500;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+  .sc-type { font-family: var(--font-mono); font-size: 13px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
+  .sc-title { font-family: var(--font-serif); font-size: 52px; font-weight: 400;
+    font-style: italic; color: var(--text); line-height: 1.15; margin-top: 8px; }
+  .sc-stats { display: flex; gap: 24px; margin-top: 4px; }
+  .sc-stat { background: rgba(255,255,255,0.6); border: 1px solid rgba(135,139,134,0.12);
+    border-radius: 16px; padding: 20px 28px; flex: 1; text-align: center; }
+  .sc-num { font-family: var(--font-serif); font-size: 44px; font-weight: 400;
+    color: var(--text); line-height: 1.1; }
+  .sc-label { font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.14em; margin-top: 4px; }
+  .sc-apps { display: flex; flex-direction: column; gap: 10px; }
+  .sc-app { display: flex; align-items: center; gap: 14px; }
+  .sc-app-name { font-family: var(--font-sans); font-size: 16px; font-weight: 600;
+    color: var(--text); min-width: 120px; text-align: right; }
+  .sc-app-bar-wrap { flex: 1; height: 12px; background: rgba(135,139,134,0.08);
+    border-radius: 6px; overflow: hidden; }
+  .sc-app-bar { height: 100%; background: #2d2d2d; border-radius: 6px; }
+  .sc-app-pct { font-family: var(--font-mono); font-size: 14px; color: var(--text-muted); min-width: 40px; }
+
+  .share-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; }
+  .share-modal.open { display: flex; }
+  .share-modal-inner { background: #fff; border-radius: 20px; padding: 24px;
+    max-width: 680px; width: 90%; box-shadow: 0 24px 48px rgba(0,0,0,0.2); position: relative; }
+  .share-modal-inner img { width: 100%; border-radius: 12px; border: 1px solid rgba(135,139,134,0.12); }
+  .modal-close { position: absolute; top: -12px; right: -12px; width: 32px; height: 32px;
+    border-radius: 50%; background: var(--text); color: #fff; border: none; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .share-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: center; }
+  .share-action-btn { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 20px;
+    border-radius: 999px; cursor: pointer; border: none; transition: background 0.2s;
+    display: flex; align-items: center; gap: 8px; }
+  .share-action-btn.primary { background: var(--accent); color: #fff; }
+  .share-action-btn.primary:hover { background: #e04435; }
+  .share-action-btn.secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+  .share-action-btn.secondary:hover { background: #edece5; }
+  .share-action-btn svg { width: 14px; height: 14px; }
+
+  .footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 0.6rem; color: var(--text-muted);
+    text-align: center; letter-spacing: 0.1em; text-transform: uppercase; }
+  .footer a { color: var(--accent); text-decoration: underline;
+    text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .footer-brand { font-family: var(--font-mono); font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+  .footer-links { margin-top: 6px; line-height: 1.8; }
+</style>
+</head>
+<body>
+
+<div class="label-mono">All-Time Recap</div>
+<h1>August 2025 – February 2026</h1>
+<div class="subtitle">Your voice in data &mdash; powered by Wispr Flow</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value">515</div>
+    <div class="stat-label">Dictations</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">22,509</div>
+    <div class="stat-label">Words</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">19m 24s</div>
+    <div class="stat-label">Voice Time</div>
+    
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">43.7</div>
+    <div class="stat-label">Avg Words / Dictation</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">51</div>
+    <div class="stat-label">Active Days</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value">7</div>
+    <div class="stat-label">Months Tracked</div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Month by Month</h2>
+  <div class="month-chart">
+    
+    <div class="month-col">
+      <div class="month-value">238</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 100%"></div></div>
+      <div class="month-label">Aug '25</div>
+      <div class="month-sublabel">11,124w</div>
+    </div>
+
+    <div class="month-col">
+      <div class="month-value">56</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 24%"></div></div>
+      <div class="month-label">Sep '25</div>
+      <div class="month-sublabel">1,715w</div>
+    </div>
+
+    <div class="month-col">
+      <div class="month-value">1</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 2%"></div></div>
+      <div class="month-label">Nov '25</div>
+      <div class="month-sublabel">35w</div>
+    </div>
+
+    <div class="month-col">
+      <div class="month-value">88</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 37%"></div></div>
+      <div class="month-label">Dec '25</div>
+      <div class="month-sublabel">1,979w</div>
+    </div>
+
+    <div class="month-col">
+      <div class="month-value">68</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 29%"></div></div>
+      <div class="month-label">Jan '26</div>
+      <div class="month-sublabel">3,257w</div>
+    </div>
+
+    <div class="month-col">
+      <div class="month-value">64</div>
+      <div class="month-bar-wrap"><div class="month-bar" style="height: 27%"></div></div>
+      <div class="month-label">Feb '26</div>
+      <div class="month-sublabel">4,399w</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Day of Week</h2>
+  <div class="dow-grid">
+    
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.28)">
+      <div class="dow-num" style="color: var(--text)">32</div>
+      <div class="dow-label" style="color: var(--text-muted)">Sun</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.28)">
+      <div class="dow-num" style="color: var(--text)">31</div>
+      <div class="dow-label" style="color: var(--text-muted)">Mon</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.48)">
+      <div class="dow-num" style="color: var(--text)">71</div>
+      <div class="dow-label" style="color: var(--text-muted)">Tue</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.49)">
+      <div class="dow-num" style="color: var(--text)">74</div>
+      <div class="dow-label" style="color: var(--text-muted)">Wed</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 1.00)">
+      <div class="dow-num" style="color: #f5f4ed">174</div>
+      <div class="dow-label" style="color: rgba(245,244,237,0.7)">Thu</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.68)">
+      <div class="dow-num" style="color: #f5f4ed">110</div>
+      <div class="dow-label" style="color: rgba(245,244,237,0.7)">Fri</div>
+    </div>
+
+    <div class="dow-cell" style="background: rgba(243, 78, 63, 0.24)">
+      <div class="dow-num" style="color: var(--text)">23</div>
+      <div class="dow-label" style="color: var(--text-muted)">Sat</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Hour by Hour</h2>
+  <div class="hour-grid">
+    
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.45)" title="12 AM: 23 dictations">
+      <div class="hour-num" style="color: var(--text)">23</div>
+      <div class="hour-label" style="color: var(--text-muted)">12a</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.29)" title="1 AM: 12 dictations">
+      <div class="hour-num" style="color: var(--text)">12</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.16)" title="2 AM: 3 dictations">
+      <div class="hour-num" style="color: var(--text)">3</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.26)" title="3 AM: 10 dictations">
+      <div class="hour-num" style="color: var(--text)">10</div>
+      <div class="hour-label" style="color: var(--text-muted)">3a</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.19)" title="4 AM: 5 dictations">
+      <div class="hour-num" style="color: var(--text)">5</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.18)" title="5 AM: 4 dictations">
+      <div class="hour-num" style="color: var(--text)">4</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.06)" title="6 AM: 0 dictations">
+      <div class="hour-num" style="color: var(--text)">0</div>
+      <div class="hour-label" style="color: var(--text-muted)">6a</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.06)" title="7 AM: 0 dictations">
+      <div class="hour-num" style="color: var(--text)">0</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.30)" title="8 AM: 13 dictations">
+      <div class="hour-num" style="color: var(--text)">13</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.26)" title="9 AM: 10 dictations">
+      <div class="hour-num" style="color: var(--text)">10</div>
+      <div class="hour-label" style="color: var(--text-muted)">9a</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.52)" title="10 AM: 28 dictations">
+      <div class="hour-num" style="color: #f5f4ed">28</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 1.00)" title="11 AM: 62 dictations">
+      <div class="hour-num" style="color: #f5f4ed">62</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.56)" title="12 PM: 31 dictations">
+      <div class="hour-num" style="color: #f5f4ed">31</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)">12p</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.21)" title="1 PM: 6 dictations">
+      <div class="hour-num" style="color: var(--text)">6</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.39)" title="2 PM: 19 dictations">
+      <div class="hour-num" style="color: var(--text)">19</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.53)" title="3 PM: 29 dictations">
+      <div class="hour-num" style="color: #f5f4ed">29</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)">3p</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.67)" title="4 PM: 39 dictations">
+      <div class="hour-num" style="color: #f5f4ed">39</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.60)" title="5 PM: 34 dictations">
+      <div class="hour-num" style="color: #f5f4ed">34</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.76)" title="6 PM: 45 dictations">
+      <div class="hour-num" style="color: #f5f4ed">45</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)">6p</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.29)" title="7 PM: 12 dictations">
+      <div class="hour-num" style="color: var(--text)">12</div>
+      <div class="hour-label" style="color: var(--text-muted)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.65)" title="8 PM: 37 dictations">
+      <div class="hour-num" style="color: #f5f4ed">37</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.32)" title="9 PM: 14 dictations">
+      <div class="hour-num" style="color: var(--text)">14</div>
+      <div class="hour-label" style="color: var(--text-muted)">9p</div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.82)" title="10 PM: 49 dictations">
+      <div class="hour-num" style="color: #f5f4ed">49</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+
+    <div class="hour-cell" style="background: rgba(243, 78, 63, 0.55)" title="11 PM: 30 dictations">
+      <div class="hour-num" style="color: #f5f4ed">30</div>
+      <div class="hour-label" style="color: rgba(245,244,237,0.7)"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Apps</h2>
+  
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">P</div>
+      <div class="app-header-text">
+        <div class="app-name">Perplexity</div>
+        <div class="app-stats">283 dictations &middot; 11,974 words &middot; 55%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 55%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">C</div>
+      <div class="app-header-text">
+        <div class="app-name">Claude Desktop</div>
+        <div class="app-stats">165 dictations &middot; 8,520 words &middot; 32%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 32%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">D</div>
+      <div class="app-header-text">
+        <div class="app-name">Dia Browser</div>
+        <div class="app-stats">26 dictations &middot; 628 words &middot; 5%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 5%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">S</div>
+      <div class="app-header-text">
+        <div class="app-name">Slack</div>
+        <div class="app-stats">11 dictations &middot; 487 words &middot; 2%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 2%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">C</div>
+      <div class="app-header-text">
+        <div class="app-name">ChatGPT</div>
+        <div class="app-stats">7 dictations &middot; 419 words &middot; 1%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 1%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">T</div>
+      <div class="app-header-text">
+        <div class="app-name">Terminal</div>
+        <div class="app-stats">7 dictations &middot; 164 words &middot; 1%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 1%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">W</div>
+      <div class="app-header-text">
+        <div class="app-name">Wispr Flow</div>
+        <div class="app-stats">5 dictations &middot; 14 words &middot; 1%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 1%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">G</div>
+      <div class="app-header-text">
+        <div class="app-name">Granola</div>
+        <div class="app-stats">3 dictations &middot; 64 words &middot; 1%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 1%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">N</div>
+      <div class="app-header-text">
+        <div class="app-name">Notion Mail</div>
+        <div class="app-stats">3 dictations &middot; 107 words &middot; 1%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 1%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">N</div>
+      <div class="app-header-text">
+        <div class="app-name">Notion</div>
+        <div class="app-stats">2 dictations &middot; 83 words &middot; 0%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 0%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">U</div>
+      <div class="app-header-text">
+        <div class="app-name">Unknown</div>
+        <div class="app-stats">1 dictations &middot; 2 words &middot; 0%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 0%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">1</div>
+      <div class="app-header-text">
+        <div class="app-name">1Password</div>
+        <div class="app-stats">1 dictations &middot; 1 words &middot; 0%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 0%"></div></div>
+  </div>
+
+  <div class="app-card">
+    <div class="app-header">
+      <div class="app-icon-fallback">M</div>
+      <div class="app-header-text">
+        <div class="app-name">Messages</div>
+        <div class="app-stats">1 dictations &middot; 46 words &middot; 0%</div>
+      </div>
+    </div>
+    <div class="app-bar-wrap"><div class="app-bar" style="width: 0%"></div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Daily Activity</h2>
+  <div class="daily-bars" id="dailyBars"></div>
+  <div class="daily-legend">
+    <span>Aug '25</span>
+    <span>Feb '26</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Consistency</h2>
+  <div class="streaks-grid">
+    <div class="streak-card">
+      <div class="streak-value">51</div>
+      <div class="streak-label">Active Days</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-value">57d</div>
+      <div class="streak-label">Longest Gap</div>
+    </div>
+    <div class="streak-card">
+      <div class="streak-value">4.1d</div>
+      <div class="streak-label">Avg Gap</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Voice Personality Profile</h2>
+
+  <div class="persona-card">
+    <div class="persona-top">
+      <div class="persona-emoji">&#9889;</div>
+      <div class="persona-title">Burst Worker</div>
+    </div>
+    <div class="persona-desc">You dictate in intense bursts followed by long quiet stretches. Your biggest day hit <strong>72 dictations</strong> (Dec 18, 2025), but your longest gap was <strong>57 days</strong>. When you're on, you're <em>on</em>.</div>
+    <div class="persona-stat">Top day: 72 dictations &middot; Dec 18, 2025</div>
+  </div>
+
+  <div class="persona-card">
+    <div class="persona-top">
+      <div class="persona-emoji">&#129302;</div>
+      <div class="persona-title">AI-First Communicator</div>
+    </div>
+    <div class="persona-desc"><strong>88%</strong> of your dictations go into AI tools (Perplexity, Claude, ChatGPT). You think out loud with AI &mdash; using voice as your primary input to LLMs.</div>
+    <div class="persona-stat">455 of 515 dictations &rarr; AI tools</div>
+  </div>
+
+  <div class="persona-card">
+    <div class="persona-top">
+      <div class="persona-emoji">&#128170;</div>
+      <div class="persona-title">Thu Powerhouse</div>
+    </div>
+    <div class="persona-desc">Thu is your most productive day &mdash; <strong>174 dictations</strong>. Sun: 32 &middot; Mon: 31 &middot; Tue: 71 &middot; Wed: 74 &middot; Thu: 174 &middot; Fri: 110 &middot; Sat: 23</div>
+    <div class="persona-stat">Sun: 32 &middot; Mon: 31 &middot; Tue: 71 &middot; Wed: 74 &middot; Thu: 174 &middot; Fri: 110 &middot; Sat: 23</div>
+  </div>
+
+  <div class="persona-card">
+    <div class="persona-top">
+      <div class="persona-emoji">&#127908;</div>
+      <div class="persona-title">Concise Dictator</div>
+    </div>
+    <div class="persona-desc">Your average dictation is <strong>43.7 words</strong> &mdash; quick commands and thoughts, not long monologues. Your longest was 443 words. You use voice for speed, not essays.</div>
+    <div class="persona-stat">Avg: 43.7 words &middot; Max: 443 words &middot; 22,509 total</div>
+  </div>
+</div>
+
+<div class="footer">
+  <button class="share-btn" onclick="generateShareImage()">Share</button>
+  <div class="footer-brand">Red Beard Conversions</div>
+  <div class="footer-links">
+    Generated Feb 28, 2026 &middot; Powered by <a href="https://lttlmg.ht/wisprflow">Wispr Flow</a> + Claude Code
+  </div>
+</div>
+
+<!-- Share Card -->
+<div class="share-card" id="shareCard">
+  <div>
+    <div class="sc-top">
+      <div class="sc-brand">Wispr Flow</div>
+      <div class="sc-type">All-Time Recap</div>
+    </div>
+    <div class="sc-title">August 2025 – February 2026</div>
+  </div>
+  <div class="sc-stats">
+    <div class="sc-stat"><div class="sc-num">515</div><div class="sc-label">Dictations</div></div>
+    <div class="sc-stat"><div class="sc-num">22,509</div><div class="sc-label">Words</div></div>
+    <div class="sc-stat"><div class="sc-num">19m 24s</div><div class="sc-label">Voice Time</div></div>
+  </div>
+  <div class="sc-apps">
+    
+      <div class="sc-app">
+        <div class="sc-app-name">Perplexity</div>
+        <div class="sc-app-bar-wrap"><div class="sc-app-bar" style="width: 55%"></div></div>
+        <div class="sc-app-pct">55%</div>
+      </div>
+
+      <div class="sc-app">
+        <div class="sc-app-name">Claude Desktop</div>
+        <div class="sc-app-bar-wrap"><div class="sc-app-bar" style="width: 32%"></div></div>
+        <div class="sc-app-pct">32%</div>
+      </div>
+
+      <div class="sc-app">
+        <div class="sc-app-name">Dia Browser</div>
+        <div class="sc-app-bar-wrap"><div class="sc-app-bar" style="width: 5%"></div></div>
+        <div class="sc-app-pct">5%</div>
+      </div>
+  </div>
+</div>
+
+<!-- Share Modal -->
+<div class="share-modal" id="shareModal">
+  <div class="share-modal-inner">
+    <button class="modal-close" onclick="closeShareModal()">&times;</button>
+    <img id="shareImg" />
+    <div class="share-actions">
+      <button class="share-action-btn primary" onclick="downloadShareImage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download
+      </button>
+      <button class="share-action-btn secondary" onclick="shareOnX()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        Share on X
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const dailyData = [["2025-08-01",7],["2025-08-07",4],["2025-08-08",1],["2025-08-09",2],["2025-08-12",3],["2025-08-13",1],["2025-08-14",15],["2025-08-15",1],["2025-08-19",13],["2025-08-20",4],["2025-08-21",19],["2025-08-22",7],["2025-08-26",3],["2025-08-27",2],["2025-08-28",44],["2025-08-29",39],["2025-08-30",28],["2025-08-31",45],["2025-09-01",3],["2025-09-02",3],["2025-09-03",23],["2025-09-06",1],["2025-09-08",6],["2025-09-09",5],["2025-09-10",7],["2025-09-11",1],["2025-09-12",3],["2025-09-16",3],["2025-09-30",1],["2025-11-26",1],["2025-12-18",72],["2025-12-19",16],["2026-01-02",1],["2026-01-08",6],["2026-01-09",19],["2026-01-15",9],["2026-01-16",16],["2026-01-20",1],["2026-01-21",2],["2026-01-26",4],["2026-01-29",1],["2026-01-30",9],["2026-02-01",1],["2026-02-02",9],["2026-02-03",8],["2026-02-04",8],["2026-02-05",5],["2026-02-20",4],["2026-02-21",1],["2026-02-23",3],["2026-02-24",25]];
+const maxDaily = Math.max(...dailyData.map(d => d[1]));
+const barsContainer = document.getElementById('dailyBars');
+dailyData.forEach(([date, cnt]) => {
+  const pct = (cnt / maxDaily) * 100;
+  const bar = document.createElement('div');
+  bar.className = 'daily-bar';
+  bar.style.height = Math.max(pct, 2) + '%';
+  const tip = document.createElement('div');
+  tip.className = 'daily-tip';
+  const d = new Date(date + 'T12:00:00');
+  tip.textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ': ' + cnt;
+  bar.appendChild(tip);
+  barsContainer.appendChild(bar);
+});
+
+const shareText = "515 dictations across 7 months with @WisprFlow — 88% going straight to AI tools";
+let shareBlob = null;
+async function generateShareImage() {
+  const btn = document.querySelector(".share-btn"); btn.textContent = "...";
+  const card = document.getElementById("shareCard");
+  card.style.left = "0"; card.style.top = "0"; card.style.position = "fixed"; card.style.zIndex = "-1";
+  try {
+    const canvas = await html2canvas(card, { scale: 2, backgroundColor: "#f5f4ed", width: 1200, height: 630, useCORS: true });
+    card.style.left = "-9999px"; card.style.position = "absolute"; card.style.zIndex = "";
+    document.getElementById("shareImg").src = canvas.toDataURL("image/png");
+    canvas.toBlob(b => { shareBlob = b; });
+    document.getElementById("shareModal").classList.add("open");
+  } catch (e) { console.error(e); }
+  btn.textContent = "Share";
+}
+function closeShareModal() { document.getElementById("shareModal").classList.remove("open"); }
+function downloadShareImage() {
+  const a = document.createElement("a"); a.href = document.getElementById("shareImg").src;
+  a.download = "wispr-alltime-recap.png"; a.click();
+}
+async function shareOnX() {
+  if (shareBlob && navigator.canShare && navigator.canShare({ files: [new File([shareBlob], "recap.png", { type: "image/png" })] })) {
+    await navigator.share({ text: shareText, files: [new File([shareBlob], "wispr-alltime-recap.png", { type: "image/png" })] });
+  } else { downloadShareImage(); setTimeout(() => window.open("https://x.com/intent/tweet?text=" + encodeURIComponent(shareText), "_blank"), 500); }
+}
+document.getElementById("shareModal").addEventListener("click", (e) => { if (e.target === e.currentTarget) closeShareModal(); });
+</script>
+</body>
+</html>
